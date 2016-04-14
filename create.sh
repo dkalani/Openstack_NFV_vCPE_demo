@@ -41,17 +41,20 @@ else
 	glance image-create --name $VNF_2_image --is-public True --disk-format qcow2 --container-format bare --progress --file $VNF_2_file
 fi
 
+#Create physical attachment point
+PAP_uuid=$(neutron physical-attachment-point-create wan-physical --interface hostname=plumgrid--devstack,interface_name=$WAN_net_physical_port --hash_mode=L2 --lacp false | grep "| id" |awk '{print $4}')
+
 #Create WAN-net
 echo "Creating WAN network..."
 #Check whether we're on a flat or vlan network and create accordingly
 if [ "$WAN_net_type" = "vlan" ]
 then
-	neutron net-create --router:external --provider:physical_network=$WAN_net_physical_port \
+	neutron net-create --router:external --provider:physical_network=$PAP_uuid \
 		--provider:network_type="vlan" --provider:segmentation_id=$WAN_net_vlan_id \
 		$WAN_net_name
 	echo "WAN net created as VLAN "$WAN_net_vlan_id" on port "$WAN_net_physical_port
 else
-        neutron net-create --router:external --provider:physical_network=$WAN_net_physical_port \
+        neutron net-create --router:external --provider:physical_network=$PAP_uuid \
                 --provider:network_type="flat" \
                 $WAN_net_name
         echo "WAN net created as flat on port "$WAN_net_physical_port

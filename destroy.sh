@@ -85,6 +85,8 @@ sleep 1
 #Delete external connectivity: WAN_net and subnet
 neutron subnet-delete $WAN_subnet_name
 neutron net-delete $WAN_net_name
+neutron physical-attachment-point-delete wan-physical
+
 sleep 3
 
 #Delete default security group with all rules
